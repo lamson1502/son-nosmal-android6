@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by lamso on 10/2/16.
@@ -13,6 +14,8 @@ public class GameWindow extends Frame implements Runnable {
 
     private static final int BACKGROUND_WIDTH = 600;
     private static final int BACKGROUND_HEIGHT = 400;
+    public static final int PLANE_WIDTH = 50;
+    public static final int PLANE_HEIGHT = 35;
 
     Image backgroundImage;
     Image backBufferImage;
@@ -20,14 +23,34 @@ public class GameWindow extends Frame implements Runnable {
     Plane plane1;
     Plane plane2;
 
+    ArrayList<Enemies> planeEnemies = new ArrayList<Enemies>();
+
     String linkPlane1 = "resources/plane2.png";
     String linkPlane2 = "resources/plane4.png";
     String linkBackGround = "resources/background.png";
+    String linkEnemyPlane = "resources/enemy_plane_white_2.png";
 
+    int timeSleepEnemy = 0;
+
+    Enemies enemy;
+
+    public int rand() {
+        try {
+            Random rn = new Random();
+            int range = (BACKGROUND_WIDTH - PLANE_WIDTH) - PLANE_WIDTH + 1;
+            int randomNum = PLANE_WIDTH + rn.nextInt(range);
+            return randomNum;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
 
 
     public GameWindow() {
+
+
 
 /***********************CREATE BACK BUFFER****************************/
 
@@ -36,7 +59,9 @@ public class GameWindow extends Frame implements Runnable {
         int i = 0;
 
 
-/*******************DRAW PLANES, BACK GROUND***************************/
+
+
+/*******************INIT MY PLANE, ENEMY PLANE, BACKGROUND***************************/
         try {
             plane1 = new Plane(350, 250,
                     ImageIO.read(new File(linkPlane1)));
@@ -44,12 +69,16 @@ public class GameWindow extends Frame implements Runnable {
                     ImageIO.read(new File(linkPlane2)));
             backgroundImage = ImageIO.read (
                         new File(linkBackGround));
+            enemy = new Enemies(rand(), 0,
+                    ImageIO.read(new File(linkEnemyPlane)));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        planeEnemies.add(enemy);
 
 
-        /******************CREATE UI***************/
+
+/*************************CREATE UI**********************/
 
         this.setVisible(true);
         this.setSize(BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
@@ -196,19 +225,46 @@ public class GameWindow extends Frame implements Runnable {
                 0, 0,
                 BACKGROUND_WIDTH, BACKGROUND_HEIGHT, null);
 
+
+        /**************************MY PLANE**************************/
         plane1.drawImage(backBufferGraphics);
-        plane2.drawImage(backBufferGraphics);
 
         if(!plane1.bullets.isEmpty()) {
             for (int i = 0; i < plane1.bullets.size(); i++){
                 plane1.bullets.get(i).drawImage(backBufferGraphics);
             }
         }
+
+        plane2.drawImage(backBufferGraphics);
+
         if(!plane2.bullets.isEmpty()) {
             for (int i = 0; i < plane2.bullets.size(); i++){
                 plane2.bullets.get(i).drawImage(backBufferGraphics);
             }
         }
+
+            /************************ENEMY PLANE**********************/
+        if(timeSleepEnemy >= 100) {
+            timeSleepEnemy = 0;
+            try {
+                enemy = new Enemies(rand(), 0, ImageIO.read(new File(linkEnemyPlane)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            planeEnemies.add(enemy);
+        }
+        if(!planeEnemies.isEmpty()) {
+            for(int i = 0; i < planeEnemies.size(); i++) {
+                planeEnemies.get(i).autoCreateBullets();
+                planeEnemies.get(i).autoFly();
+                planeEnemies.get(i).drawImage(backBufferGraphics);
+                for (int j = 0; j < planeEnemies.get(i).bullets.size(); j++) {
+                    planeEnemies.get(i).bullets.get(j).drawImage(backBufferGraphics);
+                }
+            }
+        }
+
+
 
 
         g.drawImage(backBufferImage,
@@ -224,13 +280,27 @@ public class GameWindow extends Frame implements Runnable {
         while(true) {
             try {
                 Thread.sleep(17);
-                if(!plane1.bullets.isEmpty()){
-                    for(int i = 0; i < plane1.bullets.size(); i++)
-                        plane1.bullets.get(i).fly();
+                if(plane1 != null) {
+                    if (!plane1.bullets.isEmpty()) {
+                        for (int i = 0; i < plane1.bullets.size(); i++)
+                            plane1.bullets.get(i).shoot();
+                    }
                 }
-                if(!plane2.bullets.isEmpty()){
-                    for(int i = 0; i < plane2.bullets.size(); i++)
-                        plane2.bullets.get(i).fly();
+                if(plane2 != null) {
+                    if (!plane2.bullets.isEmpty()) {
+                        for (int i = 0; i < plane2.bullets.size(); i++)
+                            plane2.bullets.get(i).shoot();
+                    }
+                }
+
+                if (!planeEnemies.isEmpty()) {
+                    timeSleepEnemy++;
+                    for(int i = 0; i < planeEnemies.size(); i++) {
+                        planeEnemies.get(i).setTimeSleep(planeEnemies.get(i).getTimeSleep());
+                        for (int j = 0; j < planeEnemies.get(i).bullets.size(); j++) {
+                            planeEnemies.get(i).bullets.get(j).enemyShoot();
+                        }
+                    }
                 }
                 repaint();
             } catch (InterruptedException e) {

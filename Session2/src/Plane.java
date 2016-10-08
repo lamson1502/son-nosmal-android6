@@ -6,26 +6,50 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+
 /**
  * Created by lamso on 10/4/16.
  */
 public class Plane {
 
+/**********************************VARIABLES*****************************/
+
     public static final int PLANE_WIDTH = 50;
     public static final int PLANE_HEIGHT = 35;
+    public static final int MAX_TIME_SLEEP = 15;
+
     String linkBullet = "resources/bullet.png";
     private int x, y;
+
     private Image image;
+
 
     public ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 
     Bullet bullet = null;
 
+
+/*******************************METHODS*****************************/
+
+/********************CONSTRUCTOR******************/
     public Plane(int x, int y, Image image) {
         this.x = x;
         this.y = y;
         this.image = image;
     }
+/************************ADD BULLETS*******************/
+    public void addBullets(){
+        try {
+
+            bullet = new Bullet(x  + PLANE_WIDTH / 2 - 5, y, ImageIO.read(new File(linkBullet)));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        bullets.add(bullet);
+    }
+
+
+
 
 
     // Gettters
@@ -42,6 +66,15 @@ public class Plane {
         return image;
     }
 
+
+
+
+
+
+
+
+
+/******************************HANDING EVENTS*******************************/
 
     public void keyPressed(KeyEvent e) {
         System.out.println("keyPressed");
@@ -64,13 +97,7 @@ public class Plane {
                     y += 10;
                 break;
             case KeyEvent.VK_SPACE:
-                try {
-
-                    bullet = new Bullet(x  + PLANE_WIDTH / 2 - 5, y, ImageIO.read(new File(linkBullet)));
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-                bullets.add(bullet);
+                addBullets();
                 break;
         }
     }
@@ -81,15 +108,9 @@ public class Plane {
     }
 
     public void mousePressed(MouseEvent e){
-        try {
-
-            bullet = new Bullet(x + PLANE_WIDTH /2 - 5, y, ImageIO.read(new File(linkBullet)));
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        bullets.add(bullet);
-
+       addBullets();
     }
+
 
 
     public void drawImage(Graphics g) {
