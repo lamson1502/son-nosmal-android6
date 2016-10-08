@@ -1,3 +1,6 @@
+import org.omg.CORBA.IMP_LIMIT;
+import sun.management.snmp.jvmmib.JvmRTInputArgsEntryMBean;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.*;
@@ -8,17 +11,21 @@ import java.io.IOException;
  * Created by apple on 10/2/16.
  */
 public class GameWindow extends Frame {
-    Image backgroundImage = null;
-    Image plane;
+    Image backgroundImage;
+    Image plane1Image;
+    Image plane2Image;
     private int planeX = 350;
     private int planeY = 250;
-    Image plane2;
     private int plane2X = 100;
     private int plane2Y = 100;
+    public static final String linkPlane1 = "resources/plane2.png";
+    public static final String linkPlane2 = "resources/plane4.png";
+
 
     public GameWindow() {
         this.setVisible(true);
         this.setSize(600, 400);
+
 
         this.addWindowListener(new WindowListener() {
             @Override
@@ -68,24 +75,22 @@ public class GameWindow extends Frame {
             public void keyPressed(KeyEvent e) {
                 System.out.println("keyPressed");
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_RIGHT:
-                        System.out.println("Key right");
-                        planeX += 10;
+                    case KeyEvent.VK_UP:
+                        planeY -= 10;
+                        repaint();
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        planeY += 10;
                         repaint();
                         break;
                     case KeyEvent.VK_LEFT:
                         planeX -= 10;
                         repaint();
                         break;
-                    case KeyEvent.VK_DOWN:
-                        planeY +=10;
+                    case KeyEvent.VK_RIGHT:
+                        planeX += 10;
                         repaint();
                         break;
-                    case KeyEvent.VK_UP:
-                        planeY -= 10;
-                        repaint();
-                        break;
-
                 }
             }
 
@@ -106,8 +111,8 @@ public class GameWindow extends Frame {
         try {
             backgroundImage = ImageIO.read(
                     new File("resources/background.png"));
-            plane = ImageIO.read(new File("resources/plane3.png"));
-            plane2 = ImageIO.read(new File("resources/plane2.png"));
+            plane1Image = ImageIO.read(new File(linkPlane1));
+            plane2Image = ImageIO.read(new File(linkPlane2));
             System.out.println("Loaded backgroundImage");
         } catch (IOException e) {
             e.printStackTrace();
@@ -115,13 +120,14 @@ public class GameWindow extends Frame {
 
         repaint();
     }
+    
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         System.out.println("draw background image");
         g.drawImage(backgroundImage, 0, 0, 600, 400, null);
-        g.drawImage(plane, planeX, planeY, 50, 30, null);
-        g.drawImage(plane2, plane2X, plane2Y, 50, 30, null);
+        g.drawImage(plane1Image, planeX, planeY, 50, 30, null);
+        g.drawImage(plane2Image, plane2X, plane2Y, 50, 30, null);
     }
 }
